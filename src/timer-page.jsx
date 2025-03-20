@@ -1,21 +1,23 @@
 import { useRef, useState, useEffect } from "react";
 import "./App.css";
 
+const TIMER_VALUE = 10000;
+
 function TimerPage() {
-  const [minutes, setMinutes] = useState(0);
-  const [seconds, setSeconds] = useState(90);
+  const [timer, setTimer] = useState(TIMER_VALUE);
   const intervalRef = useRef(null);
+
+  const hours = String(Math.floor(timer / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((timer % 3600) / 60)).padStart(2, "0");
+  const seconds = String(timer % 60).padStart(2, "0");
 
   const handleStart = () => {
     if (intervalRef.current) {
       return;
     }
     intervalRef.current = setInterval(() => {
-      setSeconds((prevSeconds) => prevSeconds - 1);
+      setTimer((prevTimer) => prevTimer - 1);
     }, 1000);
-
-    setMinutes(Math.floor(seconds / 60));
-    setSeconds(seconds % 60);
   };
 
   const handleStop = () => {
@@ -30,9 +32,14 @@ function TimerPage() {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    setMinutes(0);
-    setSeconds(90);
+    setTimer(TIMER_VALUE);
   };
+
+  useEffect(() => {
+    if (timer === 0) {
+      handleStop();
+    }
+  }, [timer]);
 
   useEffect(() => {
     return () => {
@@ -45,7 +52,7 @@ function TimerPage() {
     <>
       <h1>Timer</h1>
       <p>
-        {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+        {hours} : {minutes} : {seconds}
       </p>
       <button onClick={handleStart}>Start</button>
       <button onClick={handleStop}>Stop</button>
